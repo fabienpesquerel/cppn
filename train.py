@@ -4,6 +4,7 @@ from model import CPPN
 from torchvision.utils import save_image
 import torch.nn.functional as F
 import argparse
+import IPython
 # from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -29,11 +30,12 @@ mnist = MNIST()
 
 train_mnist = mnist.train_loader
 test = mnist.test_loader
-model = CPPN()
+
 
 if opt.cuda:
-    model.cuda()
-    cuda = torch.device('cuda:0')
+    cuda_gpu = torch.device('cuda:0')
+    model = CPPN(cuda_device=cuda_gpu)
+    model.cuda_gpu()
 
 le = 0
 ld = 0
@@ -48,7 +50,7 @@ for epoch in range(opt.n_epochs):
         model.optimizer_generator.zero_grad()
 
         if opt.cuda:
-            im.cuda()
+            im = im.cuda()
             print(im.device)
 
         gen, mu, logvar, d_r, d_f = model.forward(im)

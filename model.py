@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
-
+import IPython
 
 def weights_init_normal(m):
     classname = m.__class__.__name__
@@ -19,7 +19,7 @@ class CPPN(nn.Module):
                  learning_rate=0.01, learning_rate_d=0.001, beta1=0.9,
                  learning_rate_vae=0.0001, net_size_q=512, keep_prob=1.0,
                  df_dim=24, model_name='cppn', net_size_g=128,
-                 net_depth_g=4):
+                 net_depth_g=4, cuda_device=None):
         super(CPPN, self).__init__()
         self.x_dim = x_dim
         self.y_dim = y_dim
@@ -43,10 +43,14 @@ class CPPN(nn.Module):
 
         self.ones = torch.ones(batch_size, 1)
         self.zeros = torch.zeros(batch_size, 1)
+        self.cuda = cuda_device
+        if self.cuda is not None:
+            self.ones = self.ones.cuda()
+            self.zeros = self.zeros.cuda()
 
         self.encoder = Encoder()
         self.discriminator = Discriminator()
-        self.generator = Generator()
+        self.generator = Generator(cuda_device=self.cuda)
 
         self.optimizer_encoder = optim.Adam(self.encoder.parameters(),
                                             lr=learning_rate_vae,
@@ -152,7 +156,8 @@ class Discriminator(nn.Module):
 class Generator(nn.Module):
     def __init__(self, batch_size=1, z_dim=32, c_dim=1,
                  scale=4.0, x_dim=28, y_dim=28, layers=4,
-                 size=256, metric='2', activation='tanh', leak=None):
+                 size=256, metric='2', activation='tanh', leak=None,
+                 cuda_device=None):
         super(Generator, self).__init__()
         self.x_dim = x_dim
         self.y_dim = y_dim
@@ -161,6 +166,7 @@ class Generator(nn.Module):
         self.batch_size = batch_size
         self.c_dim = c_dim
         self.metric = metric
+        self.cuda = cuda_device
         n_points = x_dim * y_dim
         self.n_points = n_points
         in_layer = 3 + z_dim
@@ -225,6 +231,8 @@ class Generator(nn.Module):
         r_unroll = self.r_unroll
         coord = torch.cat((x_unroll, y_unroll), dim=1)
         coord = torch.cat((coord, r_unroll), dim=1)
+        if self.cuda is not None:
+            coord = coord.cuda()
         # Coord has dim n_points * 3 at this point
         z = z.view(1, self.z_dim)
         z = z.expand(self.n_points, self.z_dim)
