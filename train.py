@@ -47,7 +47,7 @@ for epoch in range(opt.n_epochs):
         model.optimizer_generator.zero_grad()
 
         if opt.cuda:
-            im.cuda(opt.cuda, non_blocking=True)
+            im.cuda()
             print(im.device())
 
         gen, mu, logvar, d_r, d_f = model.forward(im)
