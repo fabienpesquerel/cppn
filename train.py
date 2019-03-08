@@ -48,7 +48,7 @@ for epoch in range(opt.n_epochs):
 
         if opt.cuda:
             im.cuda()
-            print(im.device())
+            print(im.device)
 
         gen, mu, logvar, d_r, d_f = model.forward(im)
 
