@@ -33,6 +33,7 @@ model = CPPN()
 
 if opt.cuda:
     model.cuda()
+    cuda = torch.device('cuda:0')
 
 le = 0
 ld = 0
