@@ -43,14 +43,14 @@ class CPPN(nn.Module):
 
         self.ones = torch.ones(batch_size, 1)
         self.zeros = torch.zeros(batch_size, 1)
-        self.cuda = cuda_device
-        if self.cuda is not None:
+        self.device = cuda_device
+        if cuda_device is not None:
             self.ones = self.ones.cuda()
             self.zeros = self.zeros.cuda()
 
         self.encoder = Encoder()
         self.discriminator = Discriminator()
-        self.generator = Generator(cuda_device=self.cuda)
+        self.generator = Generator(cuda_device=self.device)
 
         self.optimizer_encoder = optim.Adam(self.encoder.parameters(),
                                             lr=learning_rate_vae,
@@ -95,7 +95,7 @@ class CPPN(nn.Module):
         BCE = F.binary_cross_entropy(reconstruction, target,
                                      reduction='sum')
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-        return (BCE + KLD) / self.n_points
+        return (BCE + KLD) / self.n_points, BCE
 
     def loss_discriminator(self, reconstruction_discriminator,
                            target_discriminator):
@@ -107,8 +107,8 @@ class CPPN(nn.Module):
         loss = loss_real + loss_fake
         return loss, loss_fake
 
-    def loss_generator(self, loss_fake, ae_loss):
-        return loss_fake + ae_loss
+    def loss_generator(self, loss_fake, ae_loss, BCE):
+        return loss_fake + ae_loss + BCE / (2. * self.n_points)
 
 
 class Encoder(nn.Module):
@@ -166,7 +166,7 @@ class Generator(nn.Module):
         self.batch_size = batch_size
         self.c_dim = c_dim
         self.metric = metric
-        self.cuda = cuda_device
+        self.device = cuda_device
         n_points = x_dim * y_dim
         self.n_points = n_points
         in_layer = 3 + z_dim
@@ -231,7 +231,7 @@ class Generator(nn.Module):
         r_unroll = self.r_unroll
         coord = torch.cat((x_unroll, y_unroll), dim=1)
         coord = torch.cat((coord, r_unroll), dim=1)
-        if self.cuda is not None:
+        if self.device is not None:
             coord = coord.cuda()
         # Coord has dim n_points * 3 at this point
         z = z.view(1, self.z_dim)
