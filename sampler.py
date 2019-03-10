@@ -47,6 +47,8 @@ enc = []
 lab = []
 for idx, (im, label) in enumerate(mnist_train):
     with torch.no_grad():
+        if opt.cuda:
+            im = im.cuda()
         mean, logvar = cppn.encoder(im)
         encoding = cppn.reparametrize(mean, logvar)
     enc.append(encoding)
