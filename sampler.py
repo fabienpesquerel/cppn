@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import argparse
 from PIL import Image
 from model import CPPN
+from mnist_data import MNIST
 
 parser = argparse.ArgumentParser()
 
@@ -25,6 +26,17 @@ parser.add_argument('--file_save', type=str, default='test',
 opt = parser.parse_args()
 print(opt)
 
+mnist = MNIST()
+
+mnist_train = mnist.train_loader
+
+enc = []
+lab = []
+for idx, (im, label) in enumerate(mnist_train):
+    enc.append(im)
+    lab.append(lab)
+    if idx > 5:
+        break
 
 if opt.cuda:
     cuda_gpu = torch.device('cuda:0')
@@ -43,7 +55,10 @@ if opt.file_save == 'test':
 is still the one by default (test.gif or test.png).')
 
 if opt.output == 'png':
-    file_save = opt.file_save + '.png'
-    im = cppn.generator.generate_image()
-    im = Image.fromarray(im)
-    im.save(file_save)
+    for i in range(len(enc)):
+        im = enc[i]
+        la = lab[i]
+        file_save = opt.file_save + '_' + str(i) + '_' + str(la) + '.png'
+        im = cppn.generator.generate_image(im)
+        im = Image.fromarray(im)
+        im.save(file_save)
