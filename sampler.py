@@ -23,7 +23,7 @@ parser.add_argument('--output', type=str, default='png',
                     help='Type of output: gif or png image')
 parser.add_argument('--file_save', type=str, default='./images/test',
                     help='The file in which the output will be saved')
-parser.add_argument('--frames', type=str, default=2,
+parser.add_argument('--frames', type=int, default=2,
                     help='number of frames in an animation for the gif')
 
 opt = parser.parse_args()
