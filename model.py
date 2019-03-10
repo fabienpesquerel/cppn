@@ -230,26 +230,27 @@ class Generator(nn.Module):
     """
 
     def generate_image(self, z=None):
-        if z is None:
-            z = torch.randn(self.batch_size, self.z_dim)
-        if self.device is not None:
-            z = z.cuda()
-        z = z.double()
-        x_unroll = self.x_unroll
-        y_unroll = self.y_unroll
-        r_unroll = self.r_unroll
-        coord = torch.cat((x_unroll, y_unroll), dim=1)
-        coord = torch.cat((coord, r_unroll), dim=1)
-        if self.device is not None:
-            coord = coord.cuda()
+        with torch.no_grad():
+            if z is None:
+                z = torch.randn(self.batch_size, self.z_dim)
+            if self.device is not None:
+                z = z.cuda()
+                z = z.double()
+            x_unroll = self.x_unroll
+            y_unroll = self.y_unroll
+            r_unroll = self.r_unroll
+            coord = torch.cat((x_unroll, y_unroll), dim=1)
+            coord = torch.cat((coord, r_unroll), dim=1)
+            if self.device is not None:
+                coord = coord.cuda()
         # Coord has dim n_points * 3 at this point
-        z = z.view(1, self.z_dim)
-        z = z.expand(self.n_points, self.z_dim)
-        x = torch.cat((coord, z), dim=1).float()
-        intensity = self.generator(x)
-        image = intensity.numpy()
-        image = np.array(image.reshape(self.y_dim,
-                                       self.x_dim), dtype=np.uint8)
+            z = z.view(1, self.z_dim)
+            z = z.expand(self.n_points, self.z_dim)
+            x = torch.cat((coord, z), dim=1).float()
+            intensity = self.generator(x)
+            image = intensity.numpy()
+            image = np.array(image.reshape(self.y_dim,
+                                           self.x_dim), dtype=np.uint8)
         return image
 
     def forward(self, z):
