@@ -128,6 +128,7 @@ def save_anim_gif(filename=opt.file_save, n_frame=opt.frames,
     images = images + revImages
     durations = durations + [duration] * (frames - 2) + [duration1]
     frames = 0
+    cppn.generator.scale = (scale1 + scale2) / 2.
     images2 = []
     for j in range(len(delta)):
         z1 = enc[j]
