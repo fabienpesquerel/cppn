@@ -84,21 +84,63 @@ def save_anim_gif(filename=opt.file_save, n_frame=opt.frames,
     n1 = True
     n2 = True
     n3 = True
+    n4 = True
+    n5 = True
+    n6 = True
+    n7 = True
+    n8 = True
+    n9 = True
     for idx, (im, label) in enumerate(mnist_train):
-        if label.item() == number1 and n1:
+        if label.item() == 1 and n1:
             n1 = False
             if opt.cuda:
                 im = im.cuda()
             mean, logvar = cppn.encoder(im)
             enc.append(cppn.reparametrize(mean, logvar))
-        if label.item() == number2 and n2:
+        if label.item() == 2 and n2:
             n2 = False
             if opt.cuda:
                 im = im.cuda()
             mean, logvar = cppn.encoder(im)
             enc.append(cppn.reparametrize(mean, logvar))
-        if label.item() == number3 and n3:
+        if label.item() == 3 and n3:
             n3 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 4 and n4:
+            n4 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 5 and n5:
+            n5 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 6 and n6:
+            n6 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 7 and n7:
+            n7 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 8 and n8:
+            n8 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == 9 and n9:
+            n9 = False
             if opt.cuda:
                 im = im.cuda()
             mean, logvar = cppn.encoder(im)
