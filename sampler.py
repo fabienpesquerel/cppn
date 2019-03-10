@@ -23,6 +23,8 @@ parser.add_argument('--output', type=str, default='png',
                     help='Type of output: gif or png image')
 parser.add_argument('--file_save', type=str, default='./images/test',
                     help='The file in which the output will be saved')
+parser.add_argument('--frames', type=str, default=2,
+                    help='number of frames in an animation for the gif')
 
 opt = parser.parse_args()
 print(opt)
@@ -71,3 +73,87 @@ if opt.output == 'png':
         im = Image.fromarray(im)
         im.save(file_save)
         # save_image(im, file_save)
+
+
+def save_anim_gif(filename=opt.file_save, n_frame=opt.frames,
+                  duration1=0.5, duration2=1.0, duration=0.1,
+                  number1=1, number2=8, number3=4,
+                  scale1=4.0, scale2=17, reverse_gif=True):
+    images = []
+    enc = []
+    n1 = True
+    n2 = True
+    n3 = True
+    for idx, (im, label) in enumerate(mnist_train):
+        if label.item() == number1 and n1:
+            n1 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == number2 and n2:
+            n2 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+        if label.item() == number3 and n3:
+            n3 = False
+            if opt.cuda:
+                im = im.cuda()
+            mean, logvar = cppn.encoder(im)
+            enc.append(cppn.reparametrize(mean, logvar))
+
+    delta = []
+    n = len(enc)
+    for i in range(n-1):
+        delta_z = (enc[i+1] - enc[i]) / (n_frame + 1)
+        delta.append(delta_z)
+    delta_s = (scale2 - scale1) / (n_frame + 1)
+    s = scale1
+    e = enc[0]
+    frames = 0
+    for i in range(n_frame):
+        cppn.generator.scale = s
+        im = cppn.generator.generate_image(e)
+        # im = Image.fromarray(im)
+        images.append(im)
+        s += delta_s
+        frames += 1
+    print(images)
+    durations = [duration1] + [duration]*(frames - 2) + [duration2]
+    revImages = list(images)
+    revImages.reverse()
+    revImages = revImages[1:]
+    images = images + revImages
+    durations = durations + [duration] * (frames - 2) + [duration1]
+    frames = 0
+    images2 = []
+    for j in range(len(delta)):
+        z1 = enc[j]
+        delta_z = delta[j]
+        for i in range(n_frame):
+            z_gen = z1 + delta_z*float(i)
+            print("processing image ", i)
+            im = cppn.generator.generate_image(z_gen)
+            # im = Image.fromarray(im)
+            images2.append(im)
+            frames += 1
+    durations2 = [duration] + [duration]*(frames - 2) + [duration2]
+    if reverse_gif:
+        rev = list(images2)
+        rev.reverse()
+        rev = rev[1:]
+        images2 = images2 + rev
+        durations2 = durations2 + [duration] * (frames - 2) + [duration1]
+
+    images = images + images2
+    durations = durations + durations2
+
+    print("Writing a gif...")
+    filename = filename + ".gif"
+    imageio.mimsave(filename, images, duration=durations)
+
+
+if opt.output == 'gif':
+    save_anim_gif()

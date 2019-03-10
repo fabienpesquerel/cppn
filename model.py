@@ -236,9 +236,10 @@ class Generator(nn.Module):
             if self.device is not None:
                 z = z.cuda()
             z = z.double()
-            x_unroll = self.x_unroll
-            y_unroll = self.y_unroll
-            r_unroll = self.r_unroll
+            x_mat, y_mat, r_mat = self._coordinates()
+            x_unroll = x_mat.view(self.n_points, 1)
+            y_unroll = y_mat.view(self.n_points, 1)
+            r_unroll = r_mat.view(self.n_points, 1)
             coord = torch.cat((x_unroll, y_unroll), dim=1)
             coord = torch.cat((coord, r_unroll), dim=1)
             if self.device is not None:
@@ -247,7 +248,7 @@ class Generator(nn.Module):
             z = z.view(1, self.z_dim)
             z = z.expand(self.n_points, self.z_dim)
             x = torch.cat((coord, z), dim=1).float()
-            intensity = self.generator(x).cpu()
+            intensity = 1. - self.generator(x).cpu()
             image = 255.0 * intensity.numpy()
             image = np.array(image.reshape(self.y_dim,
                                            self.x_dim), dtype=np.uint8)
