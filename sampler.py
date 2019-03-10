@@ -6,6 +6,7 @@ import argparse
 from PIL import Image
 from model import CPPN
 from mnist_data import MNIST
+from torchvision.utils import save_image
 
 parser = argparse.ArgumentParser()
 
@@ -20,7 +21,7 @@ parser.add_argument('--scale', type=float, default=5.0,
 parser.add_argument('--cuda', action='store_true', help='use GPU computation')
 parser.add_argument('--output', type=str, default='png',
                     help='Type of output: gif or png image')
-parser.add_argument('--file_save', type=str, default='test',
+parser.add_argument('--file_save', type=str, default='./images/test',
                     help='The file in which the output will be saved')
 
 opt = parser.parse_args()
@@ -67,5 +68,6 @@ if opt.output == 'png':
         la = lab[i]
         file_save = opt.file_save + '_' + str(i) + '.png'
         im = cppn.generator.generate_image(im)
-        im = Image.fromarray(im)
-        im.save(file_save)
+        # im = Image.fromarray(im)
+        # im.save(file_save)
+        save_image(im, file_save)
