@@ -57,8 +57,8 @@ for epoch in range(opt.n_epochs):
         gen, mu, logvar, d_r, d_f = model.forward(im)
 
         loss_encoder, bce = model.loss_encoder(gen, im.view(model.n_points,
-                                                       model.batch_size),
-                                          mu, logvar)
+                                                            model.batch_size),
+                                               mu, logvar)
         loss_discriminator, l_f = model.loss_discriminator(d_f, d_r)
         loss_generator = model.loss_generator(l_f, loss_encoder, bce)
 
@@ -92,7 +92,7 @@ for epoch in range(opt.n_epochs):
                                model.y_dim), 'im_true_' + str(epoch) + '_' +
                        str(idx) + '.png')
 
-    torch.save(model.state_dict(), './model_' + str(epoch) + 'pt')
+    torch.save(model.state_dict(), './model_' + str(epoch) + '.pt')
     model.scheduler_discriminator.step()
     model.scheduler_encoder.step()
     model.scheduler_generator.step()

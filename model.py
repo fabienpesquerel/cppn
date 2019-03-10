@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torch import optim
 import IPython
 
+
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -50,7 +51,10 @@ class CPPN(nn.Module):
 
         self.encoder = Encoder()
         self.discriminator = Discriminator()
-        self.generator = Generator(cuda_device=self.device)
+        self.generator = Generator(cuda_device=self.device,
+                                   x_dim=x_dim,
+                                   y_dim=y_dim,
+                                   scale=scale)
 
         self.optimizer_encoder = optim.Adam(self.encoder.parameters(),
                                             lr=learning_rate_vae,
@@ -190,8 +194,8 @@ class Generator(nn.Module):
         model += [nn.Linear(size, c_dim), nn.Sigmoid()]
 
         self.generator = nn.Sequential(*model)
-        self.reinit()
 
+    """
     def generate_image(self, z=None):
         if z is None:
             z = torch.randn(self.batch_size, self.z_dim)
@@ -222,6 +226,28 @@ class Generator(nn.Module):
         else:
             image = np.array(image.reshape(self.y_dim,
                                            self.x_dim), dtype=np.uint8)
+        return image
+    """
+
+    def generate_image(self, z=None):
+        if z is None:
+            z = torch.randn(self.batch_size, self.z_dim)
+        z = z.double()
+        x_unroll = self.x_unroll
+        y_unroll = self.y_unroll
+        r_unroll = self.r_unroll
+        coord = torch.cat((x_unroll, y_unroll), dim=1)
+        coord = torch.cat((coord, r_unroll), dim=1)
+        if self.device is not None:
+            coord = coord.cuda()
+        # Coord has dim n_points * 3 at this point
+        z = z.view(1, self.z_dim)
+        z = z.expand(self.n_points, self.z_dim)
+        x = torch.cat((coord, z), dim=1).float()
+        intensity = self.generator(x)
+        image = intensity.numpy()
+        image = np.array(image.reshape(self.y_dim,
+                                       self.x_dim), dtype=np.uint8)
         return image
 
     def forward(self, z):
