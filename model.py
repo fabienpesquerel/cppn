@@ -235,7 +235,7 @@ class Generator(nn.Module):
                 z = torch.randn(self.batch_size, self.z_dim)
             if self.device is not None:
                 z = z.cuda()
-                z = z.double()
+            z = z.double()
             x_unroll = self.x_unroll
             y_unroll = self.y_unroll
             r_unroll = self.r_unroll
