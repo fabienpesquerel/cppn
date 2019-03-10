@@ -30,14 +30,6 @@ mnist = MNIST()
 
 mnist_train = mnist.train_loader
 
-enc = []
-lab = []
-for idx, (im, label) in enumerate(mnist_train):
-    enc.append(im)
-    lab.append(lab)
-    if idx > 5:
-        break
-
 if opt.cuda:
     cuda_gpu = torch.device('cuda:0')
     cppn = CPPN(x_dim=opt.x_dim, y_dim=opt.y_dim, scale=opt.scale,
@@ -49,6 +41,19 @@ else:
     cppn.load_state_dict(torch.load(opt.model, map_location='cpu'))
 
 cppn.eval()
+
+
+enc = []
+lab = []
+for idx, (im, label) in enumerate(mnist_train):
+    with torch.no_grad():
+        mean, logvar = cppn.encoder(im)
+        encoding = cppn.reparametrize(mean, logvar)
+    enc.append(encoding)
+    lab.append(lab)
+    if idx > 5:
+        break
+
 
 if opt.file_save == 'test':
     print('WARNING - The name of the file in which the output will be stored \
