@@ -68,6 +68,6 @@ if opt.output == 'png':
         la = lab[i]
         file_save = opt.file_save + '_' + str(i) + '.png'
         im = cppn.generator.generate_image(im)
-        # im = Image.fromarray(im)
-        # im.save(file_save)
-        save_image(im, file_save)
+        im = Image.fromarray(im)
+        im.save(file_save)
+        # save_image(im, file_save)
