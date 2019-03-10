@@ -232,6 +232,8 @@ class Generator(nn.Module):
     def generate_image(self, z=None):
         if z is None:
             z = torch.randn(self.batch_size, self.z_dim)
+        if self.cuda_device is not None:
+            z = z.cuda()
         z = z.double()
         x_unroll = self.x_unroll
         y_unroll = self.y_unroll
