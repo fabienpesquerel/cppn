@@ -247,7 +247,7 @@ class Generator(nn.Module):
             z = z.view(1, self.z_dim)
             z = z.expand(self.n_points, self.z_dim)
             x = torch.cat((coord, z), dim=1).float()
-            intensity = self.generator(x)
+            intensity = self.generator(x).cpu()
             image = intensity.numpy()
             image = np.array(image.reshape(self.y_dim,
                                            self.x_dim), dtype=np.uint8)
