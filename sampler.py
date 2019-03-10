@@ -65,7 +65,7 @@ if opt.output == 'png':
     for i in range(len(enc)):
         im = enc[i]
         la = lab[i]
-        file_save = opt.file_save + '_' + str(i) + '_' + str(la) + '.png'
+        file_save = opt.file_save + '_' + str(i) + '.png'
         im = cppn.generator.generate_image(im)
         im = Image.fromarray(im)
         im.save(file_save)
