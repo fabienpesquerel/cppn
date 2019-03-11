@@ -58,26 +58,26 @@ class CPPN(nn.Module):
 
         self.optimizer_encoder = optim.Adam(self.encoder.parameters(),
                                             lr=learning_rate_vae,
-                                            weight_decay=1e-4)
+                                            weight_decay=1e-5)
         self.optimizer_generator = optim.Adam(self.generator.parameters(),
                                               lr=learning_rate,
-                                              weight_decay=1e-4)
+                                              weight_decay=1e-5)
         self.optimizer_discriminator = optim.Adam(
             self.discriminator.parameters(),
             lr=learning_rate_d,
-            weight_decay=1e-4)
+            weight_decay=1e-5)
         self.scheduler_encoder = optim.lr_scheduler.StepLR(
             self.optimizer_encoder,
             step_size=1,
-            gamma=0.9)
+            gamma=0.93)
         self.scheduler_generator = optim.lr_scheduler.StepLR(
             self.optimizer_generator,
             step_size=1,
-            gamma=0.9)
+            gamma=0.95)
         self.scheduler_discriminator = optim.lr_scheduler.StepLR(
             self.optimizer_discriminator,
             step_size=1,
-            gamma=0.9)
+            gamma=0.95)
 
     def reparametrize(self, mu, logvar):
         std = torch.exp(0.5 * logvar)
@@ -112,7 +112,7 @@ class CPPN(nn.Module):
         return loss, loss_fake
 
     def loss_generator(self, loss_fake, ae_loss, BCE):
-        return loss_fake + ae_loss + BCE / (2. * self.n_points)
+        return 2*loss_fake + ae_loss + BCE / (self.n_points)
 
 
 class Encoder(nn.Module):

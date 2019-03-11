@@ -5,6 +5,7 @@ from torchvision.utils import save_image
 import torch.nn.functional as F
 import argparse
 import IPython
+import numpy as np
 # from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -43,6 +44,8 @@ le = 0
 ld = 0
 lg = 0
 
+indices_train = np.arange(60000)
+
 model.train()
 for epoch in range(opt.n_epochs):
     print("STARTING EPOCH {}".format(epoch))
@@ -73,6 +76,28 @@ for epoch in range(opt.n_epochs):
         le += loss_encoder.item()
         ld += loss_discriminator.item()
         lg += loss_generator.item()
+
+        if idx % 1000 == 1:
+            np.random.shuffle(indices_train)
+            l_rd = indices_train[:200]
+            n = len(l_rd)
+            ctr = 0
+            for idx_d, (im_d, _) in enumerate(train_mnist):
+                if idx_d in l_rd:
+                    model.optimizer_discriminator.zero_grad()
+                    model.optimizer_encoder.zero_grad()
+                    model.optimizer_generator.zero_grad()
+                    if opt.cuda:
+                        im_d = im_d.cuda()
+                    gen, mu, logvar, d_r, d_f = model.forward(im)
+
+                    loss_discriminator, l_f = model.loss_discriminator(d_f, d_r)
+                    loss_discriminator.backward()
+                    model.optimizer_discriminator.step()
+                    ctr += 1
+                if ctr > n:
+                    break
+
 
         if idx % 501 == 0:
             print("loss encoder: {}".format(le / 501.))
